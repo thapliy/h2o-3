@@ -516,14 +516,13 @@ class H2OFrame(object):
         return H2OFrame._expr(expr=ExprNode("not", self), cache=self._ex._cache)
 
 
-    def _unop(self, op):
-        for cname, ctype in self.types():
+    def _unop(self, op, rtype="real"):
+        for cname, ctype in self.types:
             if ctype not in {"int", "real", "bool"}:
                 raise H2OTypeError("Function %s cannot be applied to %s column '%s'" % (op, ctype, cname))
         ret = H2OFrame._expr(expr=ExprNode(op, self), cache=self._ex._cache)
-        ret._ex._cache._names = ["%s(%s)" % (op, name) for name in ret._ex._cache._names]
-        # May produce either int or real or bool types
-        ret._ex._cache._types = None
+        ret._ex._cache._names = ["%s(%s)" % (op, name) for name in self._ex._cache._names]
+        ret._ex._cache._types = {name: rtype for name in ret._ex._cache._names}
         return ret
 
 
@@ -752,7 +751,7 @@ class H2OFrame(object):
 
     def sign(self):
         """Return new H2OFrame equal to signs of the values in the frame: -1 , +1, or 0."""
-        return self._unop("sign")
+        return self._unop("sign", rtype="int")
 
 
     def sqrt(self):
@@ -762,25 +761,26 @@ class H2OFrame(object):
 
     def trunc(self):
         """
-        Apply the numeric truncation function.
+Apply the numeric truncation function.
 
-        ``trunc(x)`` is the integer obtained from ``x`` by dropping its decimal tail. This is equal to ``floor(x)``
-        if ``x`` is positive, and ``ceil(x)`` if ``x`` is negative. Truncation is also called "rounding towards zero".
+``trunc(x)`` is the integer obtained from ``x`` by dropping its decimal tail. This is equal to ``floor(x)``
+if ``x`` is positive, and ``ceil(x)`` if ``x`` is negative. Truncation is also called "rounding towards zero".
 
-        :returns: new H2OFrame of truncated values of the original frame.
-        """
-        return self._unop("trunc")
+:returns: new H2OFrame of truncated values of the original frame.
+"""
+        return self._unop("trunc", rtype="int")
 
 
     def ceil(self):
         """
-        Apply the ceiling function to the current frame.
+Apply the ceiling function to the current frame.
 
-        ``ceil(x)`` is the smallest integer greater or equal to ``x``.
+``ceil(x)`` is the smallest integer greater or equal to ``x``.
 
-        :returns: new H2OFrame of ceiling values of the original frame.
-        """
-        return self._unop("ceiling")
+:returns: new H2OFrame of ceiling values of the original frame.
+"""
+        return self._unop("ceiling", rtype="int")
+
 
 
     def floor(self):
@@ -791,7 +791,7 @@ class H2OFrame(object):
 
         :returns: new H2OFrame of floor values of the original frame.
         """
-        return self._unop("floor")
+        return self._unop("floor", rtype="int")
 
 
     def log(self):
