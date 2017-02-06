@@ -22,7 +22,7 @@ import requests
 
 import h2o
 from h2o.display import H2ODisplay
-from h2o.exceptions import H2OValueError
+from h2o.exceptions import H2OTypeError, H2OValueError
 from h2o.expr import ExprNode
 from h2o.group_by import GroupBy
 from h2o.job import H2OJob
@@ -36,8 +36,6 @@ from h2o.utils.typechecks import (assert_is_type, assert_satisfies, Enum, I, is_
                                   numpy_datetime, pandas_dataframe, pandas_timestamp, scipy_sparse, U)
 
 __all__ = ("H2OFrame", )
-
-
 
 
 class H2OFrame(object):
@@ -516,11 +514,13 @@ class H2OFrame(object):
         return H2OFrame._expr(expr=ExprNode("not", self), cache=self._ex._cache)
 
 
-    def _unop(self, op):
+    def _unop(self, op, rtype="real"):
+        for cname, ctype in self.types.items():
+            if ctype not in {"int", "real", "bool"}:
+                raise H2OTypeError("Function %s cannot be applied to %s column '%s'" % (op, ctype, cname))
         ret = H2OFrame._expr(expr=ExprNode(op, self), cache=self._ex._cache)
-        if ret._ex._cache._names is not None:
-            ret._ex._cache._names = ["%s(%s)" % (op, name) for name in ret._ex._cache._names]
-            ret._ex._cache._types = None
+        ret._ex._cache._names = ["%s(%s)" % (op, name) for name in self._ex._cache._names]
+        ret._ex._cache._types = {name: rtype for name in ret._ex._cache._names}
         return ret
 
 
@@ -749,7 +749,8 @@ class H2OFrame(object):
 
     def sign(self):
         """Return new H2OFrame equal to signs of the values in the frame: -1 , +1, or 0."""
-        return self._unop("sign")
+        return self._unop("sign", rtype="int")
+
 
 
     def sqrt(self):
@@ -766,7 +767,7 @@ class H2OFrame(object):
 
         :returns: new H2OFrame of truncated values of the original frame.
         """
-        return self._unop("trunc")
+        return self._unop("trunc", rtype="int")
 
 
     def ceil(self):
@@ -777,7 +778,7 @@ class H2OFrame(object):
 
         :returns: new H2OFrame of ceiling values of the original frame.
         """
-        return self._unop("ceiling")
+        return self._unop("ceiling", rtype="int")
 
 
     def floor(self):
@@ -788,7 +789,7 @@ class H2OFrame(object):
 
         :returns: new H2OFrame of floor values of the original frame.
         """
-        return self._unop("floor")
+        return self._unop("floor", rtype="int")
 
 
     def log(self):
@@ -1049,7 +1050,7 @@ class H2OFrame(object):
         Convert the frame (containing strings / categoricals) into the ``date`` format.
 
         :param str format: the format string (e.g. "YYYY-mm-dd")
-        :returns: new H2OFrame with "date" column types
+        :returns: new H2OFrame with "int" column types
         """
         fr = H2OFrame._expr(expr=ExprNode("as.Date", self, format), cache=self._ex._cache)
         if fr._ex._cache.types_valid():
@@ -1099,7 +1100,8 @@ class H2OFrame(object):
 
     def prod(self, na_rm=False):
         """
-        Compute the product of all values in the frame.
+        Compute the product of all values across all rows in a single column H2O frame.  If you apply
+        this command on a multi-column H2O frame, the answer may not be correct.
 
         :param bool na_rm: If True then NAs will be ignored during the computation.
         :returns: product of all values in the frame (a float)
@@ -1842,7 +1844,7 @@ class H2OFrame(object):
 
     def relevel(self, y):
         """
-        Reorder levels of an H2O factor.
+        Reorder levels of an H2O factor for one single column of a H2O frame
 
         The levels of a factor are reordered such that the reference level is at level 0, all remaining levels are
         moved down as needed.
@@ -2137,7 +2139,8 @@ class H2OFrame(object):
 
     def countmatches(self, pattern):
         """
-        For each string in the frame, count the occurrences of the provided pattern.
+        For each string in the frame, count the occurrences of the provided pattern.  If countmathces is applied to
+        a frame, all columns of the frame must be type string, otherwise, the returned frame will contain errors.
 
         The pattern here is a plain string, not a regular expression. We will search for the occurrences of the
         pattern as a substring in element of the frame. This function is applicable to frames containing only
@@ -2495,8 +2498,8 @@ class H2OFrame(object):
         """
         Conduct a diff-1 transform on a numeric frame column.
 
-        :returns: an H2OFrame where each element is equal to the corresponding element in the source
-        frame minus the previous-row element in the same frame.
+        :returns: a single-column H2OFrame where each element is equal to the corresponding element in the source
+            frame minus the previous-row element in the same frame.
         """
         fr = H2OFrame._expr(expr=ExprNode("difflag1", self), cache=self._ex._cache)
         return fr
