@@ -10,8 +10,8 @@ def h2o_H2OFrame_set_names():
     """
     Python API test: h2o.frame.H2OFrame.set_names(names)
     """
-    row_num = randrange(1,10)
-    col_num = randrange(1,10)
+    row_num = random.randrange(1,10)
+    col_num = random.randrange(1,10)
     python_lists = np.random.randint(-5,5, (row_num, col_num))
     h2oframe = h2o.H2OFrame(python_obj=python_lists)
 

@@ -5,6 +5,7 @@ import h2o
 from tests import pyunit_utils
 from random import randrange
 from h2o.utils.typechecks import assert_is_type
+import numpy as np
 
 
 def h2o_H2OFrame_ischaracter():

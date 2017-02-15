@@ -18,7 +18,7 @@ def h2o_H2OFrame_quantile():
     data = [[random.uniform(-10000,10000)] for c in range(1000)]
     h2o_data = h2o.H2OFrame(data)
     np_data = np.array(data)
-    h2o_quants = h2o_data.quantile(prob=None, combine_metho9d='interpolate', weights_column=None)
+    h2o_quants = h2o_data.quantile(prob=None, combine_method='interpolate', weights_column=None)
     assert_is_type(h2o_quants, H2OFrame)
 
     np_quants = np.percentile(np_data,[1, 10, 25, 33.3, 50, 66.7, 75, 90, 99],axis=0)
