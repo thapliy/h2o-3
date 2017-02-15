@@ -1,6 +1,7 @@
 package water.udf.specialized;
 
 import com.google.common.collect.Sets;
+import water.Key;
 import water.fvec.Chunk;
 import water.fvec.Frame;
 import water.fvec.Vec;
@@ -35,6 +36,7 @@ public class Enums extends DataColumns.BaseFactory<Integer, EnumColumn> {
   }
 
   public static Enums enums(String[] domain) {
+    if (domain == null) throw new IllegalArgumentException("Domain missing in Enums factory creation");
     return new Enums(domain);
   }
 
@@ -64,18 +66,27 @@ public class Enums extends DataColumns.BaseFactory<Integer, EnumColumn> {
   }
 
   static Frame oneHotEncoding(String name, Vec vec) throws IOException {
+    if (vec.domain() == null) throw new IllegalArgumentException("Could not create frame " + name + ", vec has no domain");
     EnumColumn enumColumn = new EnumColumn(vec);
     UnfoldingFrame<Integer, DataColumn<Integer>> plain = enumColumn.oneHotEncodedFrame(name);
     return plain.materialize();
   }
+
+  public static Frame oneHotEncoding(Key<Frame> destKey, Frame dataset, String[] skipCols) throws IOException {
+    return dataset;
+//    return oneHotEncoding(dataset, skipCols, new Frame(destKey));
+  }  
   
   public static Frame oneHotEncoding(Frame dataset, String[] skipCols) throws IOException {
-    Set<String> skipit = (skipCols == null) ? Collections.EMPTY_SET : Sets.newHashSet(skipCols);
-    Frame output = new Frame();
-    
+    return oneHotEncoding(dataset, skipCols, new Frame());
+  }
+
+  static Frame oneHotEncoding(Frame dataset, String[] skipCols, Frame output) throws IOException {
+    Set<String> skipit = (skipCols == null) ? Collections.<String>emptySet() : Sets.newHashSet(skipCols);
+
     for(String colName : dataset.names()) {
       final Vec vec = dataset.vec(colName);
-      if (skipit.contains(colName)) {
+      if (skipit.contains(colName) || !vec.isCategorical() || vec.domain() == null) {
         output.add(colName, vec);
       } else {
         output.add(oneHotEncoding(colName, vec));

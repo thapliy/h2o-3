@@ -7,6 +7,7 @@ import water.*;
 import water.fvec.*;
 import water.parser.ParseDataset;
 import water.parser.ParseSetup;
+import water.udf.specialized.Enums;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -83,9 +84,18 @@ public class FrameUtils {
       case Enum:
       case OneHotInternal:
         return dataset; //leave as is - most algos do their own internal default handling of enums
+// Commented out until further notice.      
+//      case OneHot:
+//        dataset.checkVecs("Before OneHot");
+//        try {
+//          Frame res = Enums.oneHotEncoding(newDestKey(), dataset, skipCols);
+//          dataset.checkVecs("same frame, After OneHot");
+//          res.checkVecs("encoded frame, after OneHot");
+//          return res;
+//        } catch(IOException ioe) {
+//          throw new RuntimeException("OneHot encoding has a problem", ioe);
+//        }
       case OneHotExplicit:
-        return new CategoricalOneHotEncoder(dataset, skipCols).exec().get();
-      case OneHot:
         return new CategoricalOneHotEncoder(dataset, skipCols).exec().get();
       case Binary:
         return new CategoricalBinaryEncoder(dataset, skipCols).exec().get();
@@ -670,13 +680,20 @@ public class FrameUtils {
     abstract H2O.H2OCountedCompleter driver(Key<Frame> destKey);
 
     public Job<Frame> exec() {
-      Key<Frame> destKey = Key.makeSystem(Key.make().toString());
+      return exec(newDestKey());
+    }
+
+    Job<Frame> exec(Key<Frame> destKey) {
       _job = new Job<>(destKey, Frame.class.getName(), getClass().getSimpleName());
       int workAmount = _frame.lastVec().nChunks();
       return _job.start(driver(destKey), workAmount);
     }
   }
-  
+
+  static Key<Frame> newDestKey() {
+    return Key.makeSystem(Key.make().toString());
+  }
+
   /**
    * Helper to convert a categorical variable into the first eigenvector of the dummy-expanded matrix.
    */

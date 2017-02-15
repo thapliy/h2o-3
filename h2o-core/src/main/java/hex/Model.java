@@ -128,7 +128,7 @@ public abstract class Model<M extends Model<M,P,O>, P extends Model.Parameters, 
       AUTO, Random, Modulo, Stratified
     }
     public enum CategoricalEncodingScheme {
-      AUTO, OneHotInternal, OneHotExplicit, OneHot, Enum, Binary, Eigen
+      AUTO, OneHotInternal, OneHotExplicit, Enum, Binary, Eigen
     }
     public long _seed = -1;
     public long getOrMakeRealSeed(){
