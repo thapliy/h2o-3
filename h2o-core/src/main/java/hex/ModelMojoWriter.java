@@ -153,6 +153,7 @@ public abstract class ModelMojoWriter<M extends Model<M, P, O>, P extends Model.
       writeModelInfo();
       writeDomains();
       writeModelDetails();
+      writeModelDetailsReadme();
       zos.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -250,8 +251,14 @@ public abstract class ModelMojoWriter<M extends Model<M, P, O>, P extends Model.
    */
   private void writeModelDetails() throws IOException{
     ModelSchemaV3 modelSchema = (ModelSchemaV3) SchemaServer.schema(3, model).fillFromImpl(model);
-    startWritingTextFile("properties/modelDetails.json");
+    startWritingTextFile("experimental/modelDetails.json");
     writeln(modelSchema.toJsonString());
+    finishWritingTextFile();
+  }
+  private void writeModelDetailsReadme() throws IOException{
+    startWritingTextFile("experimental/README.md");
+    writeln("Outputting model information in JSON is an experimental feature and we appreciate any feedback.\n" +
+                "The contents of this folder may change with another version of H2O.");
     finishWritingTextFile();
   }
 }
