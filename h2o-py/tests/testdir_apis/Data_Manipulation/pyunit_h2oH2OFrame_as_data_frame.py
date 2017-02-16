@@ -13,7 +13,7 @@ def h2o_H2OFrame_as_data_frame():
     Copied from pyunit_as_data_frame.py
     """
     smallbike = h2o.import_file(pyunit_utils.locate("smalldata/jira/citibike_head.csv"))
-    smallbike_noheader = smallbike.as_data_frame(use_pandas=False, header=False)
+    smallbike_noheader = smallbike.as_data_frame(use_pandas=True, header=False)
     assert_is_type(smallbike_noheader, DataFrame)
     assert len(smallbike_noheader) == smallbike.nrow
 

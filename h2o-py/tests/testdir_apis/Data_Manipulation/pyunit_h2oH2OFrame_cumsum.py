@@ -22,6 +22,9 @@ def h2o_H2OFrame_cumsum():
     cumsum_col = foo_transpose.cumsum()   # default
     cumsum_row = foo.cumsum(axis=1)   # row
 
+    npsum_col = np.cumsum(python_object_transpose, axis=1)
+    npsum_row = np.cumsum(python_object, axis=1)
+
     # check correct return type
     assert_is_type(cumsum_col, H2OFrame)
     assert_is_type(cumsum_row, H2OFrame)

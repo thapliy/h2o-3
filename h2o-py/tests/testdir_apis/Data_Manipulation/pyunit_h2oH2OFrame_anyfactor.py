@@ -15,7 +15,7 @@ def h2o_H2OFrame_anyfactor():
     assert_is_type(h2oframe, H2OFrame)
     # should return false since all are numbers
     assert not(h2oframe.anyfactor()), "h2o.H2OFrame.anyfactor() command is not working."
-    h2oframe[0]=h2oframe[0]>0.0     # change one column to categorical
+    h2oframe[0]=h2oframe[0].asfactor()     # change one column to categorical
     assert h2oframe.anyfactor(), "h2o.H2OFrame.anyfactor() command is not working."
 
 if __name__ == "__main__":
