@@ -2834,22 +2834,21 @@ def assert_corret_frame_operation(h2oFrame, h2oNewFrame, operString):
     :return: None.
     """
     validStrings = ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil', 'cos', 'cosh',
-                    'cumsum', 'digamma', 'exp', 'floor', 'gamma', 'lgamma', 'log', 'log10', 'sin', 'sinh',
-                    'sqrt', 'tan', 'tanh', 'trigamma']
+                     'exp', 'floor', 'gamma', 'lgamma', 'log', 'log10', 'sin', 'sinh',
+                    'sqrt', 'tan', 'tanh', 'trigamma', 'expm1']
     npValidStrings = ['log2', 'sign']
-    nativeStrings = ['round', 'abs']
+    nativeStrings = ['round', 'abs', 'cumsum']
     multpi = ['cospi', 'sinpi', 'tanpi']
     result_val = 0.0
 
-
-    if operString == 'expm1':
-        stringOperations = 'result_val = math.'+operString+'(h2oFrame[row_ind, col_ind])-1'
-    elif operString == "log1p":
+    if operString == "log1p":
         stringOperations = 'result_val=math.log(h2oFrame[row_ind, col_ind]+1)'
     elif operString == 'signif':
         stringOperations = 'result_val = round(h2oFrame[row_ind, col_ind], 7)'
     elif operString == 'trigamma':
         stringOperations = 'result_val = scipy.special.polygamma(1,h2oFrame[row_ind, col_ind])'
+    elif operString == 'digamma':
+        stringOperations = 'result_val = scipy.special.polygamma(0,h2oFrame[row_ind, col_ind])'
     elif operString=='cumprod':
         stringOperations = 'result_val = factorial(h2oFrame[row_ind, col_ind])'
     elif operString in validStrings:

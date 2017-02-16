@@ -19,7 +19,7 @@ def h2o_H2OFrame_filter_na_cols():
     fr[1,1] = None  # make a value None, filter out the second column
 
     include_cols = fr.filter_na_cols(0.001)
-    assert assert_is_type(include_cols, list)
+    assert_is_type(include_cols, list)
     assert (1 not in include_cols) and (len(include_cols)==(fr.ncol-1)), \
         "h2o.H2OFrame.filter_na_cols() command is not working."
 

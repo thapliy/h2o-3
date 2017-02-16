@@ -42,7 +42,7 @@ def h2o_H2OFrame_impute():
     # check to make sure correct methods are imputed
     assert abs(h2oframe[row_ind_mean, 0]-impute_mean) < 1e-6, "h2o.H2OFrame.impute() command is not working."
     assert abs(h2oframe[row_ind_median, 1]-impute_median) < 1e-6, "h2o.H2OFrame.impute() command is not working."
-    assert abs(h2oframe[row_ind_mode, 2]-impute_mode) < 1e-6, "h2o.H2OFrame.impute() command is not working."
+    assert abs(int(h2oframe[row_ind_mode, 2])-impute_mode) < 1e-6, "h2o.H2OFrame.impute() command is not working."
 
 if __name__ == "__main__":
     pyunit_utils.standalone_test(h2o_H2OFrame_impute())
